@@ -84,7 +84,7 @@ After completing the lab:
 kubectl delete all --all
 minikube stop
 
-
+```
 ## Conclusion
 This lab provided hands-on experience with Kubernetes fundamentals — from setup to deployment, scaling, and maintenance.
 You learned how Kubernetes automates container orchestration, manages resources efficiently, and recovers from failures without manual intervention.
@@ -92,5 +92,5 @@ You learned how Kubernetes automates container orchestration, manages resources 
 These skills form a strong foundation for working with EKS (AWS), GKE (Google Cloud), or AKS (Azure) and are essential for any modern DevOps or Cloud-Native engineer.
 
 ## Author
-** Abdullah Saleem **
+**Abdullah Saleem**
 AIOps / DevOps Engineer
