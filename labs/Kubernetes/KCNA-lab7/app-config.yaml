@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  database_host: "mysql.example.com"
+  database_port: "3306"
+  database_name: "myapp"
+  log_level: "INFO"
+  max_connections: "100"
+  app_version: "1.2.3"
