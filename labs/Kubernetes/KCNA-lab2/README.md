@@ -1,96 +1,227 @@
-# Lab 2: Introduction to Kubernetes
+# Lab 2 – Introduction to Kubernetes 🚀
 
-## Overview
-This lab focuses on understanding and working with **Kubernetes**, the industry-standard platform for container orchestration.  
-You’ll install and configure Minikube, deploy a sample web application, explore Kubernetes core concepts, and compare it with Docker Swarm.
-
-By the end of this lab, you’ll understand how Kubernetes handles scaling, self-healing, and resource management in real-world environments.
+In this lab, I worked on setting up a local Kubernetes environment using **Minikube** and explored the fundamentals of Kubernetes architecture. The goal was to get comfortable deploying, scaling, and managing containerized applications inside a cluster.
 
 ---
 
 ## Objectives
-- Install and configure **Minikube** locally.  
-- Deploy and expose a simple **Nginx web application** on Kubernetes.  
-- Learn core concepts like **Pods**, **Deployments**, and **Services**.  
-- Demonstrate **scaling** and **self-healing** in action.  
-- Compare **Kubernetes orchestration** with **Docker Swarm**.  
-- Implement advanced features such as **health probes**, **rolling updates**, and **ConfigMaps/Secrets**.
+
+By the end of this lab, I was able to:
+
+* Set up and configure Minikube for local Kubernetes development
+* Deploy and manage a simple web application (Nginx)
+* Understand how deployments, pods, and services work together
+* Scale applications manually and test Kubernetes’ self-healing behavior
+* Compare Kubernetes orchestration with Docker Swarm
+* Perform advanced operations like rolling updates, health checks, and resource cleanup
 
 ---
 
-## Environment Setup
-- **OS:** Ubuntu 20.04 LTS  
-- **Tools:** Docker, Minikube, kubectl  
-- **Resources:** 2 CPUs, 2GB memory  
-- **Cluster Type:** Local (Minikube using VirtualBox or Docker driver)
+## Prerequisites
+
+Before starting, I made sure my environment had:
+
+* Ubuntu 20.04 LTS with Docker pre-installed
+* Basic knowledge of Docker, YAML, and Linux CLI
+* Administrative privileges (sudo access)
 
 ---
 
-## Key Tasks
+## Step 1: Installing Minikube and kubectl
 
-### 1. Kubernetes Setup
-- Installed dependencies (`curl`, `wget`, `VirtualBox`).
-- Installed **kubectl** and verified version.
-- Installed **Minikube** and started a single-node cluster.
-- Verified cluster readiness with `kubectl get nodes`.
+I started by updating my system and installing the required tools.
 
-### 2. Application Deployment
-- Created an **Nginx deployment** using both imperative and declarative approaches.
-- Defined YAML manifests for:
-  - **Deployment:** Managing Nginx replicas and containers.
-  - **Service:** Exposing Nginx through NodePort for external access.
-- Verified application accessibility using `minikube service`.
-
-### 3. Scaling and Self-Healing
-- Scaled deployment replicas up and down using `kubectl scale`.
-- Simulated pod failure and observed **automatic recovery**.
-- Watched Kubernetes maintain desired replica count and replace failed pods.
-
-### 4. Monitoring and Debugging
-- Checked cluster health and resource usage using:
-  - `kubectl top pods`
-  - `kubectl top nodes`
-- Viewed container logs and executed commands inside pods for debugging.
-
-### 5. Advanced Operations
-- Created **ConfigMaps** and **Secrets** for configuration management.  
-- Implemented **liveness** and **readiness probes** for health monitoring.  
-- Performed **rolling updates** and verified deployment version changes.  
-- Explored rollback capabilities for safe updates.
-
-### 6. Comparison with Docker Swarm
-Created a markdown comparison report highlighting:
-- Architecture differences  
-- Scaling capabilities  
-- Service discovery  
-- Ecosystem maturity  
-- Learning curve and setup simplicity  
-
-**Result:** Kubernetes offers greater flexibility and automation for large-scale systems, while Docker Swarm remains simpler for quick setups.
-
----
-
-## Troubleshooting Notes
-Common issues and quick fixes:
-- **Minikube not starting:** Try `--driver=docker` or check VirtualBox installation.  
-- **Pods stuck in Pending:** Check node resources and image pull permissions.  
-- **Service not reachable:** Validate service selectors and endpoints.
-
----
-
-## Cleanup
-After completing the lab:
 ```bash
-kubectl delete all --all
-minikube stop
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y curl wget apt-transport-https
+sudo apt install -y virtualbox virtualbox-ext-pack
+```
+Then I installed kubectl, the Kubernetes CLI:
+```Bash
 
+curl -LO "[https://dl.k8s.io/release/$(curl](https://dl.k8s.io/release/$(curl) -L -s [https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl](https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl)"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+kubectl version --client
+```
+Next, I installed Minikube:
+
+```Bash
+
+curl -LO [https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64](https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64)
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+minikube version
+```
+I started the cluster using VirtualBox:
+
+```Bash
+
+minikube start --driver=virtualbox --memory=2048 --cpus=2
+```
+After it started, I verified everything:
+```Bash
+
+minikube status
+kubectl cluster-info
+kubectl get nodes
+Step 2: Deploying a Simple Application
+```
+To test the setup, I deployed a simple nginx application.
+
+```Bash
+
+kubectl create deployment nginx-app --image=nginx:latest
+kubectl get deployments
+kubectl get pods
+kubectl describe deployment nginx-app
+```
+Then I created a working directory for my manifests:
+
+```Bash
+
+mkdir ~/k8s-lab && cd ~/k8s-lab
+```
+I applied my deployment file and confirmed that the pods were running:
+
+```Bash
+
+kubectl apply -f nginx-deployment.yaml
+kubectl get deployments
+kubectl get pods -l app=nginx
+kubectl describe pods -l app=nginx
+```
+Next, I exposed the deployment as a service:
+
+```Bash
+
+kubectl apply -f nginx-service.yaml
+kubectl get services
+kubectl describe service nginx-service
+```
+Finally, I accessed the Nginx application from my browser:
+
+```Bash
+
+minikube ip
+minikube service nginx-service --url
+curl $(minikube service nginx-service --url)
+```
+I was able to see the default Nginx welcome page, confirming everything worked correctly.
+
+Step 3: Scaling and Self-Healing
+I experimented with Kubernetes scaling and recovery behavior.
+
+Scaling Up
+```Bash
+
+kubectl get deployments nginx-deployment
+kubectl scale deployment nginx-deployment --replicas=5
+kubectl get pods -l app=nginx
+kubectl get pods -l app=nginx -w
+```
+After verifying all 5 pods were running, I scaled it back down:
+
+```Bash
+
+kubectl scale deployment nginx-deployment --replicas=2
+kubectl get pods -l app=nginx
+```
+Self-Healing Test
+I deleted one pod to simulate a failure:
+```Bash
+
+POD_NAME=$(kubectl get pods -l app=nginx -o jsonpath='{.items[0].metadata.name}')
+kubectl delete pod $POD_NAME
+kubectl get pods -l app=nginx -w
+```
+Kubernetes automatically replaced the deleted pod, showing its self-healing capability.
+
+Step 4: Logs, Debugging, and Resource Monitoring
+I checked logs from running pods and even accessed one of them interactively:
+
+```Bash
+
+kubectl logs -l app=nginx
+POD_NAME=$(kubectl get pods -l app=nginx -o jsonpath='{.items[0].metadata.name}')
+kubectl exec -it $POD_NAME -- /bin/bash
+nginx -t
+exit
+```
+To monitor resource usage:
+
+```Bash
+
+kubectl top nodes
+kubectl top pods
+kubectl describe nodes minikube
+Step 5: Kubernetes vs Docker Swarm
+To better understand orchestration differences, I compared key features.
+```
+Kubernetes example:
+
+```Bash
+
+kubectl create deployment app --image=nginx --replicas=3
+kubectl expose deployment app --port=80 --type=NodePort
+Docker Swarm equivalent:
+```
+```Bash
+
+docker service create --name app --replicas 3 --publish 80:80 nginx
+Kubernetes clearly offers more advanced management, scalability, and observability.
+```
+Step 6: Advanced Operations
+I practiced creating ConfigMaps and Secrets:
+
+```Bash
+
+kubectl create configmap nginx-config --from-literal=server_name=myapp.local
+kubectl create secret generic nginx-secret --from-literal=username=admin --from-literal=password=secretpass
+kubectl get configmaps
+kubectl get secrets
+Then I tested rolling updates:
+```
+```Bash
+
+kubectl set image deployment/nginx-with-probes nginx=nginx:1.22
+kubectl rollout status deployment/nginx-with-probes
+kubectl rollout history deployment/nginx-with-probes
+Step 7: Cleanup
+After finishing all the tasks, I cleaned up my environment:
+```
+```Bash
+
+kubectl delete deployment nginx-app
+kubectl delete deployment nginx-deployment
+kubectl delete deployment nginx-with-probes
+kubectl delete service nginx-service
+kubectl delete configmap nginx-config
+kubectl delete secret nginx-secret
+kubectl get all
+minikube stop
+Troubleshooting 🚨
+Minikube not starting
+If VirtualBox doesn’t support virtualization:
+```
+```Bash
+
+minikube start --driver=docker
+Pods stuck in pending
+Check node resources and events:
+```
+```Bash
+
+kubectl describe nodes
+kubectl get events --sort-by=.metadata.creationTimestamp
+Service not reachable
+Verify endpoints and labels:
+```
+```Bash
+
+kubectl get endpoints
+kubectl get pods --show-labels
 ```
 ## Conclusion
-This lab provided hands-on experience with Kubernetes fundamentals — from setup to deployment, scaling, and maintenance.
-You learned how Kubernetes automates container orchestration, manages resources efficiently, and recovers from failures without manual intervention.
+This lab gave me hands-on exposure to Kubernetes fundamentals — from deploying and scaling workloads to understanding self-healing and service management. I also got to compare it with Docker Swarm and see how Kubernetes handles orchestration at scale.
 
-These skills form a strong foundation for working with EKS (AWS), GKE (Google Cloud), or AKS (Azure) and are essential for any modern DevOps or Cloud-Native engineer.
-
-## Author
-**Abdullah Saleem**
-AIOps / DevOps Engineer
+It was a solid step toward mastering Kubernetes concepts that are essential for cloud-native DevOps, AIOps automation, and production-grade CI/CD pipelines.
