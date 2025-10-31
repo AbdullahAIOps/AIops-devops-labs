@@ -50,13 +50,13 @@ I started my Minikube cluster and verified its status:
 minikube start --driver=docker
 minikube status
 ````
-# Expected output:
-# minikube
-# type: Control Plane
-# host: Running
-# kubelet: Running
-# apiserver: Running
-# kubeconfig: Configured
+Expected output:
+minikube
+type: Control Plane
+host: Running
+kubelet: Running
+apiserver: Running
+kubeconfig: Configured
 Then I confirmed that kubectl was correctly configured:
 
 ```Bash
@@ -354,3 +354,4 @@ What I Learned:
 
 ## Why It Matters:
 These are the core skills required for Kubernetes administration and form the foundation for certifications like KCNA. Understanding how to interact with Kubernetes clusters and troubleshoot real issues is critical for DevOps and AIOps engineers.
+
