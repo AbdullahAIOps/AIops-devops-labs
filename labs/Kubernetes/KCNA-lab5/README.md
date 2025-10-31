@@ -46,7 +46,7 @@ I used an **Al Nafi cloud machine**, which came pre-configured with:
 sudo apt update && sudo apt upgrade -y
 ```
 1.2 Install Required Dependencies
-````bash
+```bash
 sudo apt install -y curl wget apt-transport-https
 ```
 1.3 Download and Install Minikube
