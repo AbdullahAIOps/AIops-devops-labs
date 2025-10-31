@@ -221,26 +221,26 @@ rm nginx-pod.yaml
 ```
 ## Conclusion
 In this lab, I:
+* Identified core Kubernetes cluster components
 
-Identified core Kubernetes cluster components
+* Explored how the API Server, etcd, scheduler, and controller manager interact
 
-Explored how the API Server, etcd, scheduler, and controller manager interact
+* Analyzed real logs to understand cluster operations
 
-Analyzed real logs to understand cluster operations
+* Created and tested a Pod, following its lifecycle from scheduling to running state
 
-Created and tested a Pod, following its lifecycle from scheduling to running state
+* Practiced troubleshooting cluster and network issues
 
-Practiced troubleshooting cluster and network issues
-
-Why This Lab Matters
+## Why This Lab Matters
 Understanding Kubernetes architecture is essential for:
 
-Efficient troubleshooting and debugging
+* Efficient troubleshooting and debugging
 
-Optimizing cluster performance and resource usage
+* Optimizing cluster performance and resource usage
 
-Strengthening security by knowing component roles and communication paths
+* Strengthening security by knowing component roles and communication paths
 
-Preparing for the KCNA certification and advanced Kubernetes administration
+* Preparing for the KCNA certification and advanced Kubernetes administration
 
-This lab gave me a deeper, hands-on understanding of how Kubernetes actually works under the hood — knowledge that will be invaluable for more advanced operations, scaling, and automation in future labs.
+**This lab gave me a deeper, hands-on understanding of how Kubernetes actually works under the hood — knowledge that will be invaluable for more advanced operations, scaling, and automation in future labs.**
+
