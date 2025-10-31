@@ -169,17 +169,26 @@ Subtask 3.2 — Test Service Account PermissionsGenerated tokens for each servic
 DEVELOPER_TOKEN=$(kubectl create token developer-sa -n security-lab)
 VIEWER_TOKEN=$(kubectl create token viewer-sa -n security-lab)
 ADMIN_TOKEN=$(kubectl create token admin-sa -n security-lab)
-Developer (Expected: Full Namespace Access)Bashkubectl --token=$DEVELOPER_TOKEN get pods -n security-lab
+```
+Developer (Expected: Full Namespace Access)
+```Bash
+kubectl --token=$DEVELOPER_TOKEN get pods -n security-lab
 kubectl --token=$DEVELOPER_TOKEN create configmap test-config --from-literal=key=value -n security-lab
-Viewer (Expected: Read-Only)Bashkubectl --token=$VIEWER_TOKEN get pods -n security-lab
+```
+Viewer (Expected: Read-Only)
+```Bash
+kubectl --token=$VIEWER_TOKEN get pods -n security-lab
 kubectl --token=$VIEWER_TOKEN create configmap test-fail --from-literal=key=value -n security-lab
 ```
 Access denied as expected
-```
-Admin (Expected: Full Cluster Access)Bashkubectl --token=$ADMIN_TOKEN get nodes
+
+Admin (Expected: Full Cluster Access)
+```Bash
+kubectl --token=$ADMIN_TOKEN get nodes
 kubectl --token=$ADMIN_TOKEN create configmap admin-test --from-literal=admin=true -n default
 ```
-Task 4: Configure Admission ControllersResource QuotasCreated and applied resource-quota.yaml:
+Task 4: Configure Admission ControllersResource Quotas
+Created and applied resource-quota.yaml:
 ```YAML
 apiVersion: v1
 kind: ResourceQuota
@@ -196,7 +205,7 @@ spec:
     services: "5"
     configmaps: "10"
 ```
-Tested quota enforcement with a resource-heavy deployment. Kubernetes correctly denied resources beyond limits.Network PoliciesTo restrict traffic, I implemented:
+Tested quota enforcement with a resource-heavy deployment. Kubernetes correctly denied resources beyond limits.Network Policies To restrict traffic, I implemented:
 ```YAML
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -231,7 +240,7 @@ Applied and verified:
 kubectl apply -f network-policy.yaml
 kubectl get networkpolicies -n security-lab
 ```
-Task 5: Validate Security ImplementationCreated a test-client pod with access: allowed label and confirmed it could reach the test app. An unauthorized pod without this label was unable to connect — confirming the network policy was active.Finally, I verified all security components:
+Task 5: Validate Security Implementation Created a test-client pod with access: allowed label and confirmed it could reach the test app. An unauthorized pod without this label was unable to connect — confirming the network policy was active.Finally, I verified all security components:
 ```Bash
 kubectl get serviceaccounts -n security-lab
 kubectl get roles -n security-lab
@@ -239,8 +248,7 @@ kubectl get rolebindings -n security-lab
 kubectl get networkpolicies -n security-lab
 kubectl get resourcequotas -n security-lab
 ```
-## Troubleshooting
-NotesIssueCauseFixToken not workingToken expired or invalidRecreate using kubectl create tokenRBAC not appliedMissing or misnamed RoleBindingCheck with kubectl describe rolebindingQuota ignoredMissing resource requests in Pod specsAdd resources to Pod containersNetwork Policy not blockingUnsupported CNI pluginVerify network plugin supports policiesCleanup
+## Cleanup
 ```Bash
 kubectl delete namespace security-lab
 kubectl delete clusterrolebinding admin-binding
@@ -248,12 +256,17 @@ kubectl config set-context --current --namespace=default
 ```
 ## Summary
 This lab gave me practical experience securing Kubernetes clusters using:
-- Authentication & Authorization with Service Accounts and RBACAdmission Control with Resource Quotas and Network PoliciesPrinciple of Least Privilege in action through
-- role-based accessKey TakeawaysService Accounts define identity for Pods.
+- Authentication & Authorization with Service Accounts and RBAC
+- Admission Control with Resource Quotas and Network Policies
+- Principle of Least Privilege in action through
+- role-based access
+## Key Takeaways
+- Service Accounts define identity for Pods.
 - RBAC controls permissions at namespace and cluster level.
 - Admission Controllers enforce resource and policy limits.
 - Network Policies protect communication between Pods.
 - These are essential skills for real-world Kubernetes administration and map directly to KCNA certification objectives.
 - The hands-on tests helped me see exactly how Kubernetes enforces security boundaries across different layers.
+
 
 
