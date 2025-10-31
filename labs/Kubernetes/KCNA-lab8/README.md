@@ -96,8 +96,9 @@ rules:
    resources: ["deployments", "replicasets"]
   verbs: ["get", "list"]
 ```
-Applied both roles:Bashkubectl apply -f developer-role.yaml
-```
+Applied both roles:
+```Bash
+kubectl apply -f developer-role.yaml
 kubectl apply -f viewer-role.yaml
 kubectl get roles -n security-lab
 ```
@@ -148,8 +149,9 @@ roleRef:
   name: cluster-admin
   apiGroup: rbac.authorization.k8s.io
 ```
-Applied all bindings and verified:Bashkubectl apply -f developer-rolebinding.yaml
-```
+Applied all bindings and verified:
+```Bash
+kubectl apply -f developer-rolebinding.yaml
 kubectl apply -f viewer-rolebinding.yaml
 kubectl apply -f admin-clusterrolebinding.yaml
 
@@ -253,4 +255,5 @@ This lab gave me practical experience securing Kubernetes clusters using:
 - Network Policies protect communication between Pods.
 - These are essential skills for real-world Kubernetes administration and map directly to KCNA certification objectives.
 - The hands-on tests helped me see exactly how Kubernetes enforces security boundaries across different layers.
+
 
