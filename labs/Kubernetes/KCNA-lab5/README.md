@@ -18,16 +18,7 @@ By completing this lab, I learned to:
 - Troubleshoot common installation and startup issues  
 
 ---
-
-## Prerequisites
-
-Before starting, I made sure to have:
-
-- Basic understanding of Linux commands  
-- Familiarity with Docker and containerization  
-- A general idea of Kubernetes architecture  
-- (Optional) Basic knowledge of YAML structure  
-- Access to a terminal or cloud-based Linux system  
+  
 
 I used an **Al Nafi cloud machine**, which came pre-configured with:
 
