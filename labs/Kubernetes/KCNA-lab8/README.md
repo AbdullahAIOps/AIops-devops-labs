@@ -44,25 +44,31 @@ kubectl cluster-info
 kubectl get serviceaccounts --all-namespaces
 kubectl describe serviceaccount default
 ```
-Subtask 1.2 — Understand RBAC ComponentsTo understand existing access control, I explored the built-in roles and bindings:Bashkubectl get roles --all-namespaces
-```
+Subtask 1.2 — Understand RBAC ComponentsTo understand existing access control, I explored the built-in roles and bindings:
+```Bash
+kubectl get roles --all-namespaces
 kubectl get clusterroles
 kubectl describe clusterrole view
 kubectl get rolebindings --all-namespaces
 kubectl get clusterrolebindings
 ```
-Task 2: Create Service Accounts and Implement RBACSubtask 2.1 — Create NamespaceBashkubectl create namespace security-lab
-```
+Task 2: Create Service Accounts and Implement RBACSubtask 2.1 — Create Namespace
+```Bash
+kubectl create namespace security-lab
 kubectl config set-context --current --namespace=security-lab
 kubectl get namespaces
-Subtask 2.2 — Create Service AccountsI created three service accounts:Bashkubectl create serviceaccount developer-sa -n security-lab
+```
+Subtask 2.2 — Create Service AccountsI created three service accounts:
+```Bash
+kubectl create serviceaccount developer-sa -n security-lab
 kubectl create serviceaccount viewer-sa -n security-lab
 kubectl create serviceaccount admin-sa -n security-lab
 kubectl get serviceaccounts -n security-lab
 kubectl describe serviceaccount developer-sa -n security-lab
 ```
-Subtask 2.3 — Define Custom RolesDeveloper Role (Full App Access)YAMLapiVersion: rbac.authorization.k8s.io/v1
-```
+Subtask 2.3 — Define Custom RolesDeveloper Role (Full App Access)
+```YAML
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   namespace: security-lab
@@ -75,8 +81,9 @@ rules:
   resources: ["deployments", "replicasets"]
   verbs: ["get", "list", "create", "update", "patch", "delete"]
 ```
-Viewer Role (Read-Only Access)YAMLapiVersion: rbac.authorization.k8s.io/v1
-```
+Viewer Role (Read-Only Access)
+```YAML
+apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   namespace: security-lab
@@ -94,8 +101,9 @@ Applied both roles:Bashkubectl apply -f developer-role.yaml
 kubectl apply -f viewer-role.yaml
 kubectl get roles -n security-lab
 ```
-Subtask 2.4 — Create Role BindingsDeveloper Role BindingYAMLapiVersion: rbac.authorization.k8s.io/v1
-```
+Subtask 2.4 — Create Role BindingsDeveloper Role Binding
+```YAML
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: developer-binding
@@ -109,8 +117,9 @@ roleRef:
   name: developer-role
   apiGroup: rbac.authorization.k8s.io
 ```
-Viewer Role BindingYAMLapiVersion: rbac.authorization.k8s.io/v1
-```
+Viewer Role Binding
+```YAML
+apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
   name: viewer-binding
@@ -124,8 +133,9 @@ roleRef:
   name: viewer-role
   apiGroup: rbac.authorization.k8s.io
 ```
-Admin Cluster Role BindingYAMLapiVersion: rbac.authorization.k8s.io/v1
-```
+Admin Cluster Role Binding
+```YAML
+apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: admin-binding
@@ -146,13 +156,15 @@ kubectl apply -f admin-clusterrolebinding.yaml
 kubectl get rolebindings -n security-lab
 kubectl get clusterrolebindings | grep admin-binding
 ```
-Task 3: Test Access Control MechanismsSubtask 3.1 — Create Test DeploymentBashkubectl apply -f test-deployment.yaml
-```
+Task 3: Test Access Control MechanismsSubtask 3.1 — Create Test Deployment
+```Bash
+kubectl apply -f test-deployment.yaml
 kubectl get deployments -n security-lab
 kubectl get pods -n security-lab
 ```
-Subtask 3.2 — Test Service Account PermissionsGenerated tokens for each service account:BashDEVELOPER_TOKEN=$(kubectl create token developer-sa -n security-lab)
-```
+Subtask 3.2 — Test Service Account PermissionsGenerated tokens for each service account:
+```Bash
+DEVELOPER_TOKEN=$(kubectl create token developer-sa -n security-lab)
 VIEWER_TOKEN=$(kubectl create token viewer-sa -n security-lab)
 ADMIN_TOKEN=$(kubectl create token admin-sa -n security-lab)
 Developer (Expected: Full Namespace Access)Bashkubectl --token=$DEVELOPER_TOKEN get pods -n security-lab
@@ -165,8 +177,9 @@ Access denied as expected
 Admin (Expected: Full Cluster Access)Bashkubectl --token=$ADMIN_TOKEN get nodes
 kubectl --token=$ADMIN_TOKEN create configmap admin-test --from-literal=admin=true -n default
 ```
-Task 4: Configure Admission ControllersResource QuotasCreated and applied resource-quota.yaml:YAMLapiVersion: v1
-```
+Task 4: Configure Admission ControllersResource QuotasCreated and applied resource-quota.yaml:
+```YAML
+apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: security-lab-quota
@@ -181,8 +194,9 @@ spec:
     services: "5"
     configmaps: "10"
 ```
-Tested quota enforcement with a resource-heavy deployment. Kubernetes correctly denied resources beyond limits.Network PoliciesTo restrict traffic, I implemented:YAMLapiVersion: networking.k8s.io/v1
-```
+Tested quota enforcement with a resource-heavy deployment. Kubernetes correctly denied resources beyond limits.Network PoliciesTo restrict traffic, I implemented:
+```YAML
+apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: deny-all-ingress
@@ -210,22 +224,33 @@ spec:
     - protocol: TCP
       port: 80
 ```
-Applied and verified:Bashkubectl apply -f network-policy.yaml
-```
+Applied and verified:
+```Bash
+kubectl apply -f network-policy.yaml
 kubectl get networkpolicies -n security-lab
 ```
-Task 5: Validate Security ImplementationCreated a test-client pod with access: allowed label and confirmed it could reach the test app. An unauthorized pod without this label was unable to connect — confirming the network policy was active.Finally, I verified all security components:Bashkubectl get serviceaccounts -n security-lab
-```
+Task 5: Validate Security ImplementationCreated a test-client pod with access: allowed label and confirmed it could reach the test app. An unauthorized pod without this label was unable to connect — confirming the network policy was active.Finally, I verified all security components:
+```Bash
+kubectl get serviceaccounts -n security-lab
 kubectl get roles -n security-lab
 kubectl get rolebindings -n security-lab
 kubectl get networkpolicies -n security-lab
 kubectl get resourcequotas -n security-lab
 ```
 ## Troubleshooting
-NotesIssueCauseFixToken not workingToken expired or invalidRecreate using kubectl create tokenRBAC not appliedMissing or misnamed RoleBindingCheck with kubectl describe rolebindingQuota ignoredMissing resource requests in Pod specsAdd resources to Pod containersNetwork Policy not blockingUnsupported CNI pluginVerify network plugin supports policiesCleanupBashkubectl delete namespace security-lab
-```
+NotesIssueCauseFixToken not workingToken expired or invalidRecreate using kubectl create tokenRBAC not appliedMissing or misnamed RoleBindingCheck with kubectl describe rolebindingQuota ignoredMissing resource requests in Pod specsAdd resources to Pod containersNetwork Policy not blockingUnsupported CNI pluginVerify network plugin supports policiesCleanup
+```Bash
+kubectl delete namespace security-lab
 kubectl delete clusterrolebinding admin-binding
 kubectl config set-context --current --namespace=default
 ```
 ## Summary
-This lab gave me practical experience securing Kubernetes clusters using:Authentication & Authorization with Service Accounts and RBACAdmission Control with Resource Quotas and Network PoliciesPrinciple of Least Privilege in action through role-based accessKey TakeawaysService Accounts define identity for Pods.RBAC controls permissions at namespace and cluster level.Admission Controllers enforce resource and policy limits.Network Policies protect communication between Pods.These are essential skills for real-world Kubernetes administration and map directly to KCNA certification objectives. The hands-on tests helped me see exactly how Kubernetes enforces security boundaries across different layers.
+This lab gave me practical experience securing Kubernetes clusters using:
+- Authentication & Authorization with Service Accounts and RBACAdmission Control with Resource Quotas and Network PoliciesPrinciple of Least Privilege in action through
+- role-based accessKey TakeawaysService Accounts define identity for Pods.
+- RBAC controls permissions at namespace and cluster level.
+- Admission Controllers enforce resource and policy limits.
+- Network Policies protect communication between Pods.
+- These are essential skills for real-world Kubernetes administration and map directly to KCNA certification objectives.
+- The hands-on tests helped me see exactly how Kubernetes enforces security boundaries across different layers.
+
