@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: multi-volume-app
+  namespace: storage-lab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multi-volume-app
+  template:
+    metadata:
+      labels:
+        app: multi-volume-app
+    spec:
+      containers:
+      - name: multi-volume-container
+        image: busybox:1.35
+        command: ["/bin/sh"]
+        args: ["-c", "while true; do echo 'Volume 1: '$(date) >> /data1/log1.txt; echo 'Volume 2: '$(date) >> /data2/log2.txt; sleep 45; done"]
+        volumeMounts:
+        - name: volume-1
+          mountPath: /data1
+        - name: volume-2
+          mountPath: /data2
+      volumes:
+      - name: volume-1
+        persistentVolumeClaim:
+          claimName: lab-pvc
+      - name: volume-2
+        persistentVolumeClaim:
+          claimName: lab-pvc-2
