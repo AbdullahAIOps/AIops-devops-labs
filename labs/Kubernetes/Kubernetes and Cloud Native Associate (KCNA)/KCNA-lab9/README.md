@@ -363,8 +363,10 @@ spec:
     port: 443
     targetPort: 443
     protocol: TCP
-```
   sessionAffinity: ClientIP
   sessionAffinityConfig:
     clientIP:
       timeoutSeconds: 10800
+```
+## Conclusion
+In this lab, I successfully configured and used the core Kubernetes service types: ClusterIP (internal), NodePort (basic external), and LoadBalancer (production-grade external). I gained a strong understanding of service discovery, how services maintain endpoints to track pod changes, and how to troubleshoot connectivity issues, which is critical for KCNA certification and real-world microservices networking.
