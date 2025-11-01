@@ -44,11 +44,12 @@ kubectl get storageclass
 
 kubectl create namespace storage-lab
 kubectl config set-context --current --namespace=storage-lab
+```
 Step 2: PersistentVolume (PV) and PersistentVolumeClaim (PVC)
 Create a PersistentVolume
 I created persistent-volume.yaml defining a 1Gi local storage volume using hostPath for Minikube:
 
-YAML
+```YAML
 
 apiVersion: v1
 kind: PersistentVolume
@@ -63,16 +64,18 @@ spec:
   hostPath:
     path: "/tmp/lab-data"
   persistentVolumeReclaimPolicy: Retain
+```
 Applied and verified:
 
-Bash
+```Bash
 
 kubectl apply -f persistent-volume.yaml
 kubectl get pv
+```
 Create a PersistentVolumeClaim
 I created a PVC requesting 500Mi, which bound automatically to the custom PV:
 
-YAML
+```YAML
 
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -85,16 +88,18 @@ spec:
   resources:
     requests:
       storage: 500Mi
+```
 Applied and confirmed the Bound status:
 
-Bash
+```Bash
 
 kubectl apply -f persistent-volume-claim.yaml
 kubectl get pvc
+```
 Step 3: Deploy an Application Using Persistent Storage
 I deployed a simple BusyBox Deployment that utilizes the PVC to write data.
 
-YAML
+```YAML
 
 apiVersion: apps/v1
 kind: Deployment
@@ -122,38 +127,41 @@ spec:
       - name: storage-volume
         persistentVolumeClaim:
           claimName: lab-pvc
+```
 After applying and confirming it was running:
 
-Bash
+```Bash
 
 kubectl apply -f storage-app-deployment.yaml
 kubectl get pods
 kubectl exec <pod-name> -- cat /data/timestamps.log
+```
 # Confirmed timestamps were being written.
 Step 4: Verify Data Persistence
 I tested persistence by deleting and recreating the application.
 
-Bash
+```Bash
 
 kubectl delete deployment storage-app
 kubectl apply -f storage-app-deployment.yaml
 # Checked the logs of the new pod:
 kubectl exec <new-pod-name> -- cat /data/timestamps.log
+```
 ✅ Result: The log file still contained the original timestamps, proving data persisted even after the pod and deployment were recreated.
 
 Step 5: Monitoring and Troubleshooting
 I practiced troubleshooting common issues like:
 
-PVC stuck in Pending state: Debugged by checking PV availability and storageClassName mismatch.
+* PVC stuck in Pending state: Debugged by checking PV availability and storageClassName mismatch.
 
-Pod unable to mount volume: Checked YAML syntax and PV/PVC status.
+* Pod unable to mount volume: Checked YAML syntax and PV/PVC status.
 
-Data loss: Understood the importance of the Retain reclaim policy.
+* Data loss: Understood the importance of the Retain reclaim policy.
 
-Step 6: Cleanup
+## Step 6: Cleanup
 To clean up all resources safely:
 
-Bash
+```Bash
 
 # Delete application (to stop writing data)
 kubectl delete deployment storage-app
@@ -166,25 +174,17 @@ kubectl delete pv lab-pv
 
 # Delete the namespace
 kubectl delete namespace storage-lab
-✅ Key Takeaways
+```
+## ✅ Key Takeaways
 This lab gave me a strong understanding of how Kubernetes handles stateful workloads:
 
-PVs represent the actual storage capacity available in the cluster.
+* PVs represent the actual storage capacity available in the cluster.
 
-PVCs are requests for that storage, allowing the application to consume it without knowing the underlying details.
+* PVCs are requests for that storage, allowing the application to consume it without knowing the underlying details.
 
-The Retain reclaim policy is crucial for preventing accidental data loss during testing and in production database environments.
+* The Retain reclaim policy is crucial for preventing accidental data loss during testing and in production database environments.
 
-Storage is mounted via a Volume defined in the Pod spec, which references the bound PVC.
+* Storage is mounted via a Volume defined in the Pod spec, which references the bound PVC.
 
-💡 Why This Matters
+## 💡 Why This Matters
 Persistent storage is essential for any production workload that requires data durability (e.g., databases, content management systems, file services). This knowledge is a core requirement for real-world DevOps/AIOps roles and the KCNA certification.
-
-🧭 Next Steps
-After this lab, my plan is to:
-
-Explore dynamic provisioning using StorageClasses.
-
-Practice StatefulSets for database deployments.
-
-Learn volume snapshot and backup strategies.
