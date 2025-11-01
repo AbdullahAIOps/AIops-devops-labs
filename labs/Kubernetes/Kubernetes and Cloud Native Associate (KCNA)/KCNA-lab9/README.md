@@ -76,10 +76,11 @@ EOF
 kubectl apply -f nginx-deployment.yaml
 kubectl get deployments
 kubectl get pods -l app=nginx
+```
 Subtask 1.2: Create a ClusterIP Service
 A ClusterIP service is the default type, exposing the application on an internal IP only accessible within the cluster.
 
-Bash
+```Bash
 
 cat > nginx-clusterip-service.yaml << EOF
 apiVersion: v1
@@ -101,10 +102,11 @@ EOF
 kubectl apply -f nginx-clusterip-service.yaml
 kubectl get services
 kubectl describe service nginx-clusterip-service
+```
 Subtask 1.3: Test ClusterIP Service Connectivity
 I tested connectivity using the service IP and DNS name from a temporary pod.
 
-Bash
+```Bash
 
 kubectl get service nginx-clusterip-service -o wide
 
@@ -121,11 +123,12 @@ kubectl run test-pod --image=busybox --rm -it --restart=Never -- sh
 # wget -qO- [http://nginx-clusterip-service.default.svc.cluster.local](http://nginx-clusterip-service.default.svc.cluster.local)
 
 # exit
+```
 Task 2: Change Service Type to NodePort and Verify External Access
 Subtask 2.1: Convert ClusterIP to NodePort Service
 A NodePort service exposes the service on a static port on every node's IP, allowing external access.
 
-Bash
+```Bash
 
 cat > nginx-nodeport-service.yaml << EOF
 apiVersion: v1
@@ -148,10 +151,11 @@ EOF
 kubectl apply -f nginx-nodeport-service.yaml
 kubectl get services
 kubectl describe service nginx-nodeport-service
+```
 Subtask 2.2: Test External Access via NodePort
 I tested access using the node's internal IP and the assigned NodePort (30080).
 
-Bash
+```Bash
 
 kubectl get nodes -o wide
 
@@ -160,10 +164,11 @@ for node in $(kubectl get nodes -o jsonpath='{.items[*].status.addresses[?(@.typ
   echo "Testing node: $node"
   curl -s http://$node:30080 | grep -o "<title>.*</title>" || echo "Failed to connect"
 done
+```
 Subtask 2.3: Understanding NodePort Range and Limitations
 I observed the default NodePort range (30000-32767) and created a service without specifying nodePort to see the automatic assignment.
 
-Bash
+```Bash
 
 kubectl cluster-info dump | grep service-node-port-range
 
@@ -186,11 +191,12 @@ EOF
 
 kubectl apply -f nginx-nodeport-auto.yaml
 kubectl get service nginx-nodeport-auto
+```
 Task 3: Configure LoadBalancer Service in Cloud Environment
 Subtask 3.1: Understanding LoadBalancer Services
 A LoadBalancer service uses the cloud provider's native load balancing solution, providing a dedicated external IP.
 
-Bash
+```Bash
 
 cat > nginx-loadbalancer-service.yaml << EOF
 apiVersion: v1
@@ -213,13 +219,14 @@ EOF
 
 kubectl apply -f nginx-loadbalancer-service.yaml
 kubectl get service nginx-loadbalancer-service --watch
+```
 Subtask 3.2: Test LoadBalancer Service (Cloud Environment)
 I monitored the service until an EXTERNAL-IP was assigned and tested it via curl.
 
 Subtask 3.3: Simulate LoadBalancer with MetalLB (Local Environment)
 For local testing, I simulated the LoadBalancer functionality by installing and configuring MetalLB.
 
-Bash
+```Bash
 
 kubectl apply -f [https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml](https://raw.githubusercontent.com/metallb/metallb/v0.13.7/config/manifests/metallb-native.yaml)
 kubectl wait --namespace metallb-system --for=condition=ready pod --selector=app=metallb --timeout=90s
@@ -243,11 +250,12 @@ EOF
 
 kubectl apply -f metallb-config.yaml
 kubectl get service nginx-loadbalancer-service
+```
 Task 4: Service Discovery and DNS Testing
 Subtask 4.1: Test Service DNS Resolution
 I tested the built-in Kubernetes DNS resolution using nslookup from within a temporary pod.
 
-Bash
+```Bash
 
 kubectl run dns-test --image=busybox --rm -it --restart=Never -- sh
 
@@ -255,10 +263,11 @@ kubectl run dns-test --image=busybox --rm -it --restart=Never -- sh
 # nslookup nginx-clusterip-service
 # nslookup nginx-clusterip-service.default.svc.cluster.local
 # exit
+```
 Subtask 4.2: Explore Service Endpoints
 Service endpoints track the actual Pod IPs that the service routes traffic to.
 
-Bash
+```Bash
 
 kubectl get endpoints
 kubectl describe endpoints nginx-clusterip-service
@@ -268,11 +277,12 @@ kubectl get pods -l app=nginx -o wide
 kubectl scale deployment nginx-app --replicas=5
 kubectl get endpoints nginx-clusterip-service
 kubectl scale deployment nginx-app --replicas=3
+```
 Task 5: Service Troubleshooting and Best Practices
 Subtask 5.1: Common Service Issues and Solutions
 I created a broken service with an incorrect selector (app: wrong-label) to simulate a common issue where the service has no endpoints.
 
-Bash
+```Bash
 
 cat > nginx-broken-service.yaml << EOF
 apiVersion: v1
@@ -296,21 +306,23 @@ kubectl get endpoints nginx-broken-service
 kubectl patch service nginx-broken-service -p '{"spec":{"selector":{"app":"nginx"}}}'
 kubectl get endpoints nginx-broken-service
 # Endpoints appeared, confirming the fix.
+```
 Subtask 5.2: Service Performance and Monitoring
 I practiced checking resource usage and generating test traffic.
 
-Bash
+```Bash
 
 kubectl top pods -l app=nginx
 kubectl run load-test --image=busybox --rm -it --restart=Never -- sh
 # (Traffic generation commands executed inside load-test pod)
 # exit
 kubectl logs -l app=nginx --tail=20
+```
 Task 6: Cleanup and Service Management
 Subtask 6.1: Clean Up Resources
 All created resources were successfully deleted to clean the environment.
 
-Bash
+```Bash
 
 kubectl get services
 kubectl delete service nginx-clusterip-service
@@ -321,10 +333,11 @@ kubectl delete service nginx-broken-service
 
 kubectl delete deployment nginx-app
 kubectl get all
+```
 Subtask 6.2: Service Configuration Best Practices
 I reviewed a YAML example demonstrating best practices for a production-ready LoadBalancer service, including proper labeling, annotations, named ports, and session affinity.
 
-YAML
+```YAML
 
 apiVersion: v1
 kind: Service
@@ -350,6 +363,7 @@ spec:
     port: 443
     targetPort: 443
     protocol: TCP
+```
   sessionAffinity: ClientIP
   sessionAffinityConfig:
     clientIP:
