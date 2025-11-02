@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app1-deployment
+  namespace: web-apps
+  labels:
+    app: app1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: app1
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      containers:
+      - name: app1
+        image: nginx:1.21
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: html-volume
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: html-volume
+        configMap:
+          name: app1-html
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app1-html
+  namespace: web-apps
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Application 1</title>
+        <style>
+            body { font-family: Arial, sans-serif; background-color: #e3f2fd; text-align: center; padding: 50px; }
+            h1 { color: #1976d2; }
+        </style>
+    </head>
+    <body>
+        <h1>Welcome to Application 1</h1>
+        <p>This is the first application served via Ingress path-based routing.</p>
+        <p>Path: /app1</p>
+    </body>
+    </html>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app1-service
+  namespace: web-apps
+spec:
+  selector:
+    app: app1
+  ports:
+  - port: 80
+    targetPort: 80
+  type: ClusterIP
+
