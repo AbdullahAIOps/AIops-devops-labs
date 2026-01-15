@@ -7,7 +7,7 @@ This repository showcases my hands-on labs from Alnafi and personal projects in 
 ## 🧠 Skill Domains
 
 ### 🐳 Kubernetes & Orchestration
-- [CKA Networking Lab](./labs/Kubernetes/CKA_Networking/README.md)
+- [KCNA Networking Lab](labs/Kubernetes/1. Kubernetes and Cloud Native Associate (KCNA)/)
 - [CKAD App Deployment](./labs/Kubernetes/CKAD_App_Deployment/README.md)
 - [CKS Security Policies](./labs/Kubernetes/CKS_Security_Policies/README.md)
 
