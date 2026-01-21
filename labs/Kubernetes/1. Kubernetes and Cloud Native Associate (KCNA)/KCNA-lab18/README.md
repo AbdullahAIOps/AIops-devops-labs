@@ -54,14 +54,14 @@ No additional VM or Kubernetes installation was required.
 kubectl cluster-info
 kubectl get nodes
 minikube status
+```
 Create Monitoring Namespace
-bash
-Copy code
+```bash
 kubectl create namespace monitoring
 kubectl get namespaces
+```
 Deploy Prometheus Using Helm
-bash
-Copy code
+```bash
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo update
 
@@ -69,65 +69,59 @@ helm install prometheus prometheus-community/kube-prometheus-stack \
   --namespace monitoring \
   --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false \
   --set prometheus.prometheusSpec.podMonitorSelectorNilUsesHelmValues=false
+```
 Verify Deployment
-bash
-Copy code
+```bash
 kubectl get pods -n monitoring
 kubectl get services -n monitoring
 kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=prometheus -n monitoring --timeout=300s
+```
 Access Prometheus UI
-bash
-Copy code
+```bash
 kubectl port-forward -n monitoring svc/prometheus-kube-prometheus-prometheus 9090:9090 &
+```
 Access via: http://localhost:9090
-
 Task 2: Configure Metrics Scraping
 Deploy Sample Application
 A sample application was deployed to expose metrics for Prometheus scraping.
 
-bash
-Copy code
+```bash
 kubectl apply -f sample-app.yaml
+```
 Create ServiceMonitor
-bash
-Copy code
+```bash
 kubectl apply -f sample-app-servicemonitor.yaml
+```
 Verify Metrics
-bash
-Copy code
+```bash
 kubectl get servicemonitor -n monitoring
+```
 Targets were verified in Prometheus under /targets.
 
 Task 3: Grafana Setup and Access
 Get Grafana Admin Password
-bash
-Copy code
+```bash
 kubectl get secret -n monitoring prometheus-grafana \
   -o jsonpath="{.data.admin-password}" | base64 --decode
+```
 Access Grafana
-bash
-Copy code
+```bash
 kubectl port-forward -n monitoring svc/prometheus-grafana 3000:80 &
+```
 Access via: http://localhost:3000
 Default username: admin
 
 Prometheus was already configured as a data source.
 
 Task 4: Create Grafana Dashboards
-Imported Dashboard
+**Imported Dashboard**
 Kubernetes Cluster Monitoring (Dashboard ID: 315)
-
 Custom Dashboards Created
 Node CPU Usage
-
 Node Memory Usage
-
 Disk Usage
-
 Pod CPU and Memory Usage
-
 Running Pod Count
-
 These dashboards provided real-time visibility into cluster health and workloads.
 
 Task 5: Alerting with Prometheus and Grafana
