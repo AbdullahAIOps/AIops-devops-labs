@@ -7,9 +7,9 @@ This repository showcases my hands-on labs from Alnafi and personal projects in 
 ## 🧠 Skill Domains
 
 ### 🐳 Kubernetes & Orchestration
-- [CKA Networking Lab](./labs/Kubernetes/CKA_Networking/README.md)
-- [CKAD App Deployment](./labs/Kubernetes/CKAD_App_Deployment/README.md)
-- [CKS Security Policies](./labs/Kubernetes/CKS_Security_Policies/README.md)
+- [KCNA Networking Lab](https://github.com/AbdullahAIOps/AIops-devops-labs/tree/7c2fe54039572470118fc0916a44f07bcf387382/labs/Kubernetes/1.%20Kubernetes%20and%20Cloud%20Native%20Associate%20(KCNA))
+- [CKAD App Deployment](https://github.com/AbdullahAIOps/AIops-devops-labs/tree/588223f382eb9ba036e1d07cd7eb2a3f2181e664/labs/Kubernetes/4.%20Certified%20Kubernetes%20Application%20Developer%20(CKAD))
+- [CKS Security Policies](https://github.com/AbdullahAIOps/AIops-devops-labs/tree/588223f382eb9ba036e1d07cd7eb2a3f2181e664/labs/Kubernetes/5.%20Certified%20Kubernetes%20Security%20Specialist%20(CKS))
 
 ### ⚙️ DevOps & CI/CD
 - [Jenkins CI/CD Pipeline](./labs/DevOps/Jenkins_CI_CD/README.md)
