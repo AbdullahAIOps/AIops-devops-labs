@@ -60,22 +60,22 @@ kubectl label namespace secure-apps \
   pod-security.kubernetes.io/enforce=restricted \
   pod-security.kubernetes.io/audit=restricted \
   pod-security.kubernetes.io/warn=restricted
+```
 Test an Insecure Pod
-bash
-Copy code
+```bash
 kubectl apply -f insecure-pod.yaml
+```
 Expected result: Pod creation is blocked or warned due to policy violations.
 
 Deploy a Secure Pod
-bash
-Copy code
+```bash
 kubectl apply -f secure-pod.yaml
 kubectl get pods -n secure-apps
 kubectl describe pod secure-pod -n secure-apps
+```
 Task 2: Network Policies
 Create Namespaces
-bash
-Copy code
+```bash
 kubectl create namespace frontend
 kubectl create namespace backend
 kubectl create namespace database
@@ -83,129 +83,114 @@ kubectl create namespace database
 kubectl label namespace frontend tier=frontend
 kubectl label namespace backend tier=backend
 kubectl label namespace database tier=database
+```
 Deploy Applications
-bash
-Copy code
+```bash
 kubectl apply -f frontend-app.yaml
 kubectl apply -f backend-app.yaml
 kubectl apply -f database-app.yaml
+```
 Verify:
 
-bash
-Copy code
+```bash
 kubectl get pods -n frontend
 kubectl get pods -n backend
 kubectl get pods -n database
+```
 Test Connectivity (Before Policies)
-bash
-Copy code
+```bash
 kubectl exec -n frontend <frontend-pod> -- wget http://backend-service.backend.svc.cluster.local
 kubectl exec -n frontend <frontend-pod> -- nc -zv database-service.database.svc.cluster.local 5432
+```
 Apply Network Policies
-bash
-Copy code
+```bash
 kubectl apply -f database-network-policy.yaml
 kubectl apply -f backend-network-policy.yaml
+```
 Test Policy Enforcement
-bash
-Copy code
+```bash
 # Should fail
 kubectl exec -n frontend <frontend-pod> -- nc -zv database-service.database.svc.cluster.local 5432
 
 # Should work
 kubectl exec -n frontend <frontend-pod> -- wget http://backend-service.backend.svc.cluster.local
 kubectl exec -n backend <backend-pod> -- nc -zv database-service.database.svc.cluster.local 5432
+```
 Task 3: Container Image Scanning with Trivy
 Install Trivy
-bash
-Copy code
+```bash
 curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+```
 trivy version
 Scan Images
-bash
-Copy code
+```bash
 trivy image nginx:latest
 trivy image --severity HIGH,CRITICAL nginx:latest
 trivy image --format json --output nginx-scan.json nginx:latest
+```
 Scan Cluster Images
-bash
-Copy code
+```bash
 chmod +x scan-cluster-images.sh
 ./scan-cluster-images.sh
-Secure Image Build Example
-Uses fixed image versions
-
-Drops root privileges
-
-Removes unnecessary packages
-
-Uses non-privileged ports
-
+```
+Secure Image Build Example:
+- Uses fixed image versions
+- Drops root privileges
+- Removes unnecessary packages
+- Uses non-privileged ports
 See: Dockerfile.secure
 
 Task 4: Additional Security Controls
 RBAC Configuration
-bash
-Copy code
+```bash
 kubectl apply -f rbac-config.yaml
+```
 Resource Quotas and Limits
-bash
-Copy code
+```bash
 kubectl apply -f resource-quota.yaml
+```
 Verify Security Configuration
-bash
-Copy code
+```bash
 kubectl get namespace secure-apps --show-labels
 kubectl get networkpolicies --all-namespaces
 kubectl get serviceaccounts -n secure-apps
 kubectl get resourcequota -n secure-apps
-Troubleshooting
-Pod Security Not Enforced
-Verify namespace labels
-
-Check admission controller availability
-
-Network Policies Not Working
-Ensure CNI supports NetworkPolicy (Calico, Cilium, Weave)
-
-Validate policy selectors and ports
+```
+## Troubleshooting
+- Pod Security Not Enforced
+- Verify namespace labels
+- Check admission controller availability
+- Network Policies Not Working
+- Ensure CNI supports NetworkPolicy (Calico, Cilium, Weave)
+- Validate policy selectors and ports
 
 Trivy Scan Issues
-bash
-Copy code
+```bash
 trivy image --download-db-only
 trivy image --debug nginx:latest
+```
 Lab Validation
-bash
-Copy code
+```bash
 kubectl auth can-i get pods \
   --as=system:serviceaccount:secure-apps:app-service-account \
   -n secure-apps
-Conclusion
+```
+## Conclusion
 You have successfully completed Lab 17: Exploring Kubernetes Security Best Practices.
 
-Key Takeaways
-Enforced Pod Security Standards using a modern approach
+## Key Takeaways
+- Enforced Pod Security Standards using a modern approach
+- Implemented zero-trust networking with Network Policies
+- Integrated image vulnerability scanning with Trivy
+- Applied RBAC, quotas, and limits for defense in depth
 
-Implemented zero-trust networking with Network Policies
-
-Integrated image vulnerability scanning with Trivy
-
-Applied RBAC, quotas, and limits for defense in depth
-
-Why This Matters
+## Why This Matters
 Kubernetes security is critical in production environments. The practices learned in this lab help protect against:
-
-Privilege escalation and container breakouts
-
-Lateral movement inside the cluster
-
-Vulnerable container images
-
-Resource exhaustion attacks
-
-Unauthorized access to cluster resources
-
-Security is not a one-time task. Continuously review policies, scan images, and audit access as your workloads evolve.
+- Privilege escalation and container breakouts
+- Lateral movement inside the cluster
+- Vulnerable container images
+- Resource exhaustion attacks
+- Unauthorized access to cluster resources
+- Security is not a one-time task. Continuously review policies, scan images, and audit access as your workloads evolve.
 
 🚀 Well done on building a secure Kubernetes foundation!
