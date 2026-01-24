@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: insecure-pod
+  namespace: secure-apps
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    securityContext:
+      privileged: true
+      runAsUser: 0
+      seccompProfile:
+        type: RuntimeDefault
+    ports:
+    - containerPort: 80
+
