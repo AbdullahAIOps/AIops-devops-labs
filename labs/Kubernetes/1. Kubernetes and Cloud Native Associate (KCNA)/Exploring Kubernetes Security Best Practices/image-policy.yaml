@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: image-security-policy
+  namespace: kube-system
+data:
+  policy.yaml: |
+    apiVersion: v1
+    kind: Policy
+    rules:
+    - name: "scan-images"
+      match:
+      - apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+      validate:
+        message: "Images must be scanned and have no HIGH or CRITICAL vulnerabilities"
+        pattern:
+          spec:
+            containers:
+            - name: "*"
+              image: "!*:latest"  # Discourage latest tags
